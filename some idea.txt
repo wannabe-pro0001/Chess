@@ -1,0 +1,1 @@
+lấy dữ liệu mô phỏng lại trên máy => phân tích => cho máy học
