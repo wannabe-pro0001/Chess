@@ -1,7 +1,7 @@
 """This is the main file. This file handling user input and displaying the current game state object"""
 
 from ctypes.wintypes import HICON
-import ChessEngine, MoveFinder
+import ChessEngine, MoveFinder, SmartMoveFinder
 import pygame as p
 
 WIDTH = HEIGHT = 512
@@ -31,7 +31,7 @@ def main():
     sqSelected = () #none of square is selected, keep tracking of the last click of the user(tuple (row, col))
     playerClicks = [] #keep tracking of player clicks (two tuple [(6, 4), (4, 4)])
     gameOver = False
-    PlayerOne = True   #If human is playing white then this will be true/ If an AI is playing this will be false
+    PlayerOne = False   #If human is playing white then this will be true/ If an AI is playing this will be false
     PlayerTwo = False   #same as above but for black
     while running:
         for e in p.event.get():
@@ -78,7 +78,10 @@ def main():
 
             #Ai finder move
             if not gameOver and not humanTurn:
-                move = MoveFinder.FindRandomMove(validMove)
+                #move = MoveFinder.FindRandomMove(validMove)
+                move = SmartMoveFinder.findBestMove(gs, validMove)
+                if move is None:
+                    move = SmartMoveFinder.findRandomMove(validMove)
                 gs.makeMove(move)
                 moveMade = True
                 animate = True
