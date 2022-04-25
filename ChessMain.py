@@ -1,6 +1,7 @@
 """This is the main file. This file handling user input and displaying the current game state object"""
 
 from ctypes.wintypes import HICON
+from sympy import true
 import ChessEngine, MoveFinder, SmartMoveFinder
 import pygame as p
 
@@ -31,8 +32,8 @@ def main():
     sqSelected = () #none of square is selected, keep tracking of the last click of the user(tuple (row, col))
     playerClicks = [] #keep tracking of player clicks (two tuple [(6, 4), (4, 4)])
     gameOver = False
-    PlayerOne = False   #If human is playing white then this will be true/ If an AI is playing this will be false
-    PlayerTwo = False   #same as above but for black
+    PlayerOne = True  #If human is playing white then this will be true/ If an AI is playing this will be false
+    PlayerTwo = True   #same as above but for black
     while running:
         for e in p.event.get():
             humanTurn = (gs.whiteToMove and PlayerOne) or (not gs.whiteToMove and PlayerTwo)
@@ -193,6 +194,9 @@ def AnimateMove(move, screen, board, clock):
         p.draw.rect(screen, color, endSquare)
         #draw capture piece onto rectangle
         if move.pieceCaptured != '--':
+            if move.isEnpassant:
+                enPassantRow = move.endRow + 1 if move.pieceCaptured[0] == 'b' else move.endRow - 1
+                endSquare.top = enPassantRow * SQ_SIZE;
             blit_alpha(screen, IMAGES[move.pieceCaptured], endSquare, alpha)
             #screen.blit(IMAGES[move.pieceCaptured], endSquare)
         #draw moving piece
