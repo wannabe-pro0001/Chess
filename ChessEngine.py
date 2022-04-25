@@ -58,17 +58,17 @@ class GameStart():
         if move.isPawnPromotion:
             self.board[move.endRow][move.endCol] = move.pieceMoved[0] + 'Q'
 
-        # enpassant handler
-        if move.pieceMoved[1] == 'p' and abs(move.startRow - move.endRow) == 2:
-            self.enpassantPossible = ((move.endRow + move.startRow) // 2, move.startCol) 
-        else:
-            self.enpassantPossible = ()
-
         # make enpassant move
         if move.isEnpassant:
             self.enpassantPossibleLog.append(self.enpassantPossible)
             move.pieceCaptured = self.board[move.startRow][move.endCol]
             self.board[move.startRow][move.endCol] = '--'
+
+        # enpassant handler
+        if move.pieceMoved[1] == 'p' and abs(move.startRow - move.endRow) == 2:
+            self.enpassantPossible = ((move.endRow + move.startRow) // 2, move.startCol) 
+        else:
+            self.enpassantPossible = ()
 
         # make castle move
         if move.isCastle:
@@ -173,6 +173,20 @@ class GameStart():
                 self.currentCastlingRights.bks = False
             if move.startCol == 0:
                 self.currentCastlingRights.bqs = False
+        
+        #if rook is captures
+        if move.pieceCaptured == "wR":
+            if move.endRow == 7:
+                if move.endCol == 0:
+                    self.currentCastlingRights.wqs = False;
+                elif move.endCol == 7:
+                    self.currentCastlingRights.wks = False;
+        elif move.pieceCaptured == "bR":
+            if move.endRow == 0:
+                if move.endCol == 0:
+                    self.currentCastlingRights.bqs = False;
+                elif move.endCol == 7:
+                    self.currentCastlingRights.bks = False;  
 
     def SquareIsAttacked(self, r, c):
         self.whiteToMove = not self.whiteToMove #switch to opp move so we can get opponent's move
