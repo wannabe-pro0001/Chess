@@ -58,9 +58,9 @@ class GameStart():
         if move.isPawnPromotion:
             self.board[move.endRow][move.endCol] = move.pieceMoved[0] + 'Q'
 
+        
         # make enpassant move
         if move.isEnpassant:
-            self.enpassantPossibleLog.append(self.enpassantPossible)
             move.pieceCaptured = self.board[move.startRow][move.endCol]
             self.board[move.startRow][move.endCol] = '--'
 
@@ -69,6 +69,8 @@ class GameStart():
             self.enpassantPossible = ((move.endRow + move.startRow) // 2, move.startCol) 
         else:
             self.enpassantPossible = ()
+
+        self.enpassantPossibleLog.append(self.enpassantPossible)
 
         # make castle move
         if move.isCastle:
@@ -103,7 +105,9 @@ class GameStart():
             if move.isEnpassant:
                 self.board[move.endRow][move.endCol] = '--'     #this square should be empty not enemy pawn
                 self.board[move.startRow][move.endCol] = move.pieceCaptured #this is the right square
-                self.enpassantPossible = self.enpassantPossibleLog.pop() #allow enpassant next move 
+            
+            self.enpassantPossible = self.enpassantPossibleLog.pop() #allow enpassant next move
+
             #undo 2 square pawn advance should make enpassant possible = () again
             if move.pieceMoved[1] == 'p' and abs(move.startRow - move.endRow) == 2:
                 self.enpassantPossible = ()
@@ -124,7 +128,9 @@ class GameStart():
             self.currentCastlingRights.wqs = castleRights.wqs
             self.currentCastlingRights.bks = castleRights.bks
             self.currentCastlingRights.bqs = castleRights.bqs    
-                
+            
+            self.checkMate = False
+            self.staleMate = False
 
     # '''naive algorithm '''
 
@@ -245,6 +251,16 @@ class GameStart():
                 self.checkMate = False
                 self.staleMate = True
         return moves
+
+    def IsGameOver(self, moves):
+        if len(moves) == 0:
+            if self.inCheck:
+                self.checkMate = True
+                self.staleMate = False
+            else:
+                self.checkMate = False
+                self.staleMate = True
+        return
 
     def CheckForPinsAndCheck(self):
         pins = []   # store the location of pieces is pinned and direction pin from
@@ -531,6 +547,9 @@ class Move():
         self.endCol = endSq[1]
         self.pieceMoved = board[self.startRow][self.startCol]
         self.pieceCaptured = board[self.endRow][self.endCol]
+
+        #capture move
+        self.isCapture = self.pieceCaptured != "--" or enpassant
         #pawn promotion
         self.isPawnPromotion = (self.pieceMoved == 'wp' and self.endRow == 0) or (self.pieceMoved == 'bp' and self.endRow == 7)
 
@@ -555,4 +574,25 @@ class Move():
         return self.colsToFiles[c] + self.rowsToRanks[r]
 
     def __str__(self): #call for debuging
-        return str(self.moveID)
+        if self.isCastle:
+            """O-O-O: king side castle and O-O:Queen side castle"""
+            return "0-0" if self.endCol == 6 else "O-O-O"
+
+        endSquare = self.GetRankFile(self.endRow, self.endCol)
+
+        #pawn move
+        if self.pieceMoved[1] == "p":
+            if self.isCapture:
+                return self.colsToFiles[self.startCol] + "x" + endSquare
+            else:
+                return endSquare
+            # pawn romotion
+
+        #two of same type moving to same square
+
+        #add "+" if cheking and "#" when checkmate
+
+        movestring = self.pieceMoved[1]
+        if self.isCapture:
+            movestring += "x"
+        return movestring + endSquare

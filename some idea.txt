@@ -1,1 +1,8 @@
 lấy dữ liệu mô phỏng lại trên máy => phân tích => cho máy học
+có hình thức trừng phạt máy nếu máy tính toán quá lâu.
+đưa vào các trạng thái cờ hòa
+
+@@debug thing 
+debug enpassant move let the king in check.
+cannot capture enpassant pawn when the enemy pawn check the ally king. 
+debug when com run it result game over while the game is not over yet.
