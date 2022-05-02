@@ -14,7 +14,7 @@ knightScore = [[1, 1, 1, 1, 1, 1, 1, 1],
 
 
 CHECKMATE = 1000
-STALEMATE = 0
+STALEMATE = -1000
 DEPTH = 2
 
 '''
