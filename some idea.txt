@@ -3,6 +3,6 @@ có hình thức trừng phạt máy nếu máy tính toán quá lâu.
 đưa vào các trạng thái cờ hòa
 
 @@debug thing 
-debug enpassant move let the king in check.
-cannot capture enpassant pawn when the enemy pawn check the ally king. 
-debug when com run it result game over while the game is not over yet.
+debug enpassant move let the king in check. status: done 
+cannot capture enpassant pawn when the enemy pawn check the ally king. status: done
+debug when com run it result game over while the game is not over yet. status: done

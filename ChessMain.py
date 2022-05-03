@@ -35,7 +35,7 @@ def main():
     playerClicks = [] #keep tracking of player clicks (two tuple [(6, 4), (4, 4)])
     gameOver = False
     PlayerOne = True  #If human is playing white then this will be true/ If an AI is playing this will be false
-    PlayerTwo = False   #same as above but for black
+    PlayerTwo = True   #same as above but for black
     while running:
         for e in p.event.get():
             humanTurn = (gs.whiteToMove and PlayerOne) or (not gs.whiteToMove and PlayerTwo)
@@ -72,6 +72,8 @@ def main():
                         moveMade = True
                         animate = False
                 if e.key == p.K_r:
+                    gameOver = False
+                    humanTurn = True
                     gs = ChessEngine.GameStart()
                     validMove = gs.GetValidMove()
                     sqSelected = ()
