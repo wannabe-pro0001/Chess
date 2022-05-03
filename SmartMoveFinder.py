@@ -14,7 +14,7 @@ knightScore = [[1, 1, 1, 1, 1, 1, 1, 1],
 
 
 CHECKMATE = 1000
-STALEMATE = -1000
+STALEMATE = 0
 DEPTH = 2
 
 '''
@@ -57,7 +57,6 @@ def findBestMoveMinMaxNoRecusion(gs, validMoves):
             bestPlayerMove = playerMove
         gs.undoMove()
     return bestPlayerMove
-
 
 '''
 Helper method to make first recursive call
