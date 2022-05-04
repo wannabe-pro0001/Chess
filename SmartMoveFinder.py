@@ -15,7 +15,7 @@ knightScore = [[1, 1, 1, 1, 1, 1, 1, 1],
 
 CHECKMATE = 1000
 STALEMATE = 0
-DEPTH = 2
+DEPTH = 4
 
 '''
 Picks and return a random move. 
@@ -127,8 +127,7 @@ def findMoveNegaMaxAlphaBeta(gs, validMoves, depth, alpha, beta, turnMultiplier)
     if depth == 0:
         return turnMultiplier * scoreBoard(gs)
     
-    
-    # move ordering - implement later 
+    #move ordering - implement later 
     maxScore = -CHECKMATE
     for move in validMoves:
         gs.makeMove(move)

@@ -3,7 +3,6 @@
 """
 
 from asyncio.windows_events import NULL
-
 from sympy import true
 
 class GameStart():
@@ -464,7 +463,7 @@ class GameStart():
                     moves.append(Move((r, c), (r + moveAmount, c+1), self.board))
                 if (r+moveAmount, c+1) == self.enpassantPossible:
                     # attackingPiece = blockingPiece = False
-                    # if kingRow == r:
+                    # if kingRow == r: 
                     #     if kingCol < c: #king is on the left of the pawn
                     #         insideRange = range(kingCol+1, c)
                     #         outsideRange = range(c+2, 8)
