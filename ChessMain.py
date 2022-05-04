@@ -35,7 +35,7 @@ def main():
     playerClicks = [] #keep tracking of player clicks (two tuple [(6, 4), (4, 4)])
     gameOver = False
     PlayerOne = True  #If human is playing white then this will be true/ If an AI is playing this will be false
-    PlayerTwo = True   #same as above but for black
+    PlayerTwo = False  #same as above but for black
     while running:
         for e in p.event.get():
             humanTurn = (gs.whiteToMove and PlayerOne) or (not gs.whiteToMove and PlayerTwo)
@@ -54,7 +54,7 @@ def main():
                         playerClicks.append(sqSelected)
                     if len(playerClicks) == 2:
                         move = ChessEngine.Move(playerClicks[0], playerClicks[1], gs.board) 
-                        print(move.GetChessNotation()) #use for debug
+                        #print(move.GetChessNotation()) #use for debug
                         for i in range(len(validMove)):
                             if move == validMove[i]:
                                 gs.makeMove(validMove[i])   #this move is not the same as validMove[i] so if we use move we can get some trouble with espassant or castlling move
@@ -83,10 +83,11 @@ def main():
 
             #Ai finder move
             if not gameOver and not humanTurn:
-                #move = MoveFinder.FindRandomMove(validMove)
-                move = SmartMoveFinder.findBestMove(gs, validMove)
+                #move = SmartMoveFinder.findBestMove(gs, validMove)
+                move = MoveFinder.AI.findBestMove(gs, validMove)
                 if move is None:
-                    move = SmartMoveFinder.findRandomMove(validMove)
+                    #move = SmartMoveFinder.findRandomMove(validMove)
+                    move = MoveFinder.AI.findRandomMove(validMove)
                 gs.makeMove(move)
                 moveMade = True
                 animate = True
