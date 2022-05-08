@@ -135,7 +135,7 @@ def findMoveNegaMaxAlphaBeta(gs, validMoves, depth, alpha, beta, turnMultiplier)
         validMove = gs.GetValidMove()
         score = -findMoveNegaMaxAlphaBeta(gs, validMove, depth - 1, -beta, -alpha, -turnMultiplier)
         if score > maxScore:
-            maxScore = score 
+            maxScore = score
             if depth == DEPTH:
                 nextMove = move
         gs.undoMove()

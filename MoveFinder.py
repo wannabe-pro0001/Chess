@@ -1,9 +1,11 @@
 import random
 import numpy
+from datetime import datetime
 
 CHECKMATE = 1000
 STALEMATE = 0
 DEPTH = 3
+random.seed(datetime.now())
 
 class Heuristics:
     pieceScore = {'K' : 200, 'Q' : 9, 'R': 5, 'B' : 3.2, 'N': 3, 'p' : 1}
@@ -172,21 +174,25 @@ class AI:
         
         # move ordering - implement later 
         maxScore = -AI.INFINITE if turnMultiplier else AI.INFINITE
-        for move in validMoves:
-            gs.makeMove(move)
-            validMove = gs.GetValidMove()
-            score = -AI.findMoveNegaMaxAlphaBeta(gs, validMove, depth - 1, -beta, -alpha, -turnMultiplier)
-            if score > maxScore:
-                maxScore = score 
-                if depth == DEPTH:
-                    print(str(move) + " " + str(maxScore))
-                    nextMove = move
-            gs.undoMove()
-            if maxScore > alpha: #pruning happens
-                alpha = maxScore
-            if alpha >= beta:
-                break
-        return maxScore
+        if len(validMoves) != 0:
+            for move in validMoves:
+                gs.makeMove(move)
+                validMove = gs.GetValidMove()
+                score = -AI.findMoveNegaMaxAlphaBeta(gs, validMove, depth - 1, -beta, -alpha, -turnMultiplier)
+                if score > maxScore:
+                    maxScore = score 
+                    if depth == DEPTH:
+                        print(str(move) + " " + str(-maxScore))
+                        nextMove = move
+                gs.undoMove()
+                if maxScore > alpha: #pruning happens
+                    alpha = maxScore
+                if alpha >= beta:
+                    break
+        else:
+            if gs.staleMate:
+                maxScore = STALEMATE
+        return maxScore 
 
         #from geek code minimax algorithm
         # if turnMultiplier == 1:

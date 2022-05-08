@@ -4,37 +4,97 @@ from ctypes.wintypes import HICON
 from sympy import true
 import ChessEngine, MoveFinder, SmartMoveFinder
 import pygame as p
+import button
+
 BOARD_WIDTH = BOARD_HEIGHT = 512
 MOVE_LOG_PANEL_WITDH = 250
 MOVE_LOG_PANEL_HEIGHT = BOARD_HEIGHT
+BUTTON_PANEL_HEIGHT = 125
+BUTTON_PANEL_WIDTH = BOARD_WIDTH + MOVE_LOG_PANEL_WITDH
+BUTTON_PANEL_LOCATION_Y = BOARD_HEIGHT + BUTTON_PANEL_HEIGHT / 2
 DIMENSION = 8
 SQ_SIZE = BOARD_HEIGHT // DIMENSION
 MAX_FPS = 15
 IMAGES = {}
+new_button = None
+next_button = None
+back_button = None
+exit_button = None
+
+def label(x, y, infomation):
+    #draw text with location(x, y)
+    font = p.font.Font('freesansbold.ttf', 20)
+    text = font.render(infomation, True, p.Color("blue"), None)
+    textRect = text.get_rect()
+    textRect.center = (x,y)
+    return text, textRect
+
+def resize(image, scale):
+    '''resize sacle of image'''
+    x = image.get_width()
+    y = image.get_height()
+    image = p.transform.scale(image, (x*scale, y*scale))
+    return image
 
 """ Initialize a global dictionaty images. And this is called only one"""
 def LoadImages():
+    #load piece image
     pieces = ['wR', 'wN', 'wB', 'wQ', 'wK', 'wp', 'bR', 'bN', 'bB', 'bQ', 'bK', 'bp']
     for piece in pieces:
         IMAGES[piece] = p.transform.scale(p.image.load("images/" + piece + '.png'), (SQ_SIZE, SQ_SIZE))
 
+def Load_button(screen, button_panel_location_x :int, button_panel_location_y :int, button_panel_width :int, button_panel_height :int):
+        button_rect = p.Rect(button_panel_location_x, button_panel_location_y, button_panel_width, button_panel_height)
+        p.draw.rect(screen, (0, 0, 0), button_rect)
+
+        #load button images
+        new_img = p.image.load('Form\\nutnew1.png').convert_alpha()
+        back_img= p.image.load('Form\\nutback1.png').convert_alpha()
+        exit_img = p.image.load('Form\\nutexit1.png').convert_alpha()
+        next_img = p.image.load('Form\\nutnext1.png').convert_alpha()
+
+        new_img = resize(new_img, 0.3)
+        back_img = resize(back_img, 0.3)
+        exit_img = resize(exit_img, 0.3)
+        next_img = resize(next_img, 0.3)
+
+        #create button instances
+        new_button = button.Button(70, BOARD_HEIGHT+25, new_img, 0.8)
+        back_button = button.Button(260, BOARD_HEIGHT+25, back_img, 0.8)
+        exit_button = button.Button(450, BOARD_HEIGHT+25, exit_img, 0.8)
+        next_button = button.Button(640, BOARD_HEIGHT+25, next_img, 0.8)
+
+        #create labels
+        new_text, new_rect = label(95, BOARD_HEIGHT+95, 'New')
+        back_text, back_rect = label(285, BOARD_HEIGHT+95, 'Back')
+        exit_text, exit_rect = label(475, BOARD_HEIGHT+95, 'Exit')
+        next_text, next_rect = label(665, BOARD_HEIGHT+95, 'Next')
+
+        screen.blit(new_text, new_rect)
+        screen.blit(back_text, back_rect)
+        screen.blit(exit_text, exit_rect)
+        screen.blit(next_text, next_rect)
+
+        return new_button, back_button, exit_button, next_button
+
 """The main driver for our code. This will handle user input and updating graphics"""
 def main():
     p.init()
-    screen = p.display.set_mode((BOARD_HEIGHT + MOVE_LOG_PANEL_WITDH, BOARD_WIDTH))
+    screen = p.display.set_mode((BOARD_WIDTH + MOVE_LOG_PANEL_WITDH, BOARD_HEIGHT + BUTTON_PANEL_HEIGHT))
     clock = p.time.Clock()
     screen.fill(p.Color("white"))
-    gs = ChessEngine.GameStart()
     LoadImages()
+    new_button, back_button, exit_button, next_button = Load_button(screen, 0, BOARD_HEIGHT, BUTTON_PANEL_WIDTH, BUTTON_PANEL_HEIGHT)
     moveLogFont = p.font.SysFont("Arial", 15, False, False)
     running = True
+    gs = ChessEngine.GameStart()
     validMove = gs.GetValidMove()
     moveMade = False #flag when move is made
     animate = False # flag when to animate move
     sqSelected = () #none of square is selected, keep tracking of the last click of the user(tuple (row, col))
     playerClicks = [] #keep tracking of player clicks (two tuple [(6, 4), (4, 4)])
     gameOver = False
-    PlayerOne = True  #If human is playing white then this will be true/ If an AI is playing this will be false
+    PlayerOne = True #If human is playing white then this will be true/ If an AI is playing this will be false
     PlayerTwo = False  #same as above but for black
     while running:
         for e in p.event.get():
@@ -46,7 +106,7 @@ def main():
                     location = p.mouse.get_pos() #(x, y) location of mouse
                     col = location[0] // SQ_SIZE
                     row = location[1] // SQ_SIZE
-                    if sqSelected == (row, col) or col >= 8: #if square is already choose
+                    if sqSelected == (row, col) or col >= 8 or row >= 8: #if square is already choose
                         sqSelected = () #deselect it
                         playerClicks = []
                     else:
@@ -67,19 +127,19 @@ def main():
             #key handler
             if e.type == p.KEYDOWN:
                 if e.key == p.K_z:
-                    if not gameOver:
-                        gs.undoMove()
-                        moveMade = True
-                        animate = False
+                    moveMade, animate = Undo_game(gs, gameOver, PlayerOne, PlayerTwo)
                 if e.key == p.K_r:
-                    gameOver = False
-                    humanTurn = True
-                    gs = ChessEngine.GameStart()
-                    validMove = gs.GetValidMove()
-                    sqSelected = ()
-                    playerClicks = []
-                    moveMade = False
-                    animate = False
+                    gameOver, humanTurn, gs, validMove, sqSelected, playerClicks, moveMade, animate = Reset_game()
+
+            #button handler
+            if new_button.draw(screen):
+                gameOver, humanTurn, gs, validMove, sqSelected, playerClicks, moveMade, animate = Reset_game()
+            if back_button.draw(screen):
+                moveMade, animate = Undo_game(gs, gameOver, PlayerOne, PlayerTwo)
+            if exit_button.draw(screen):
+                running = False
+            if next_button.draw(screen):
+                print('next')
 
             #Ai finder move
             if not gameOver and not humanTurn:
@@ -99,7 +159,7 @@ def main():
                 moveMade = False
                 animate = False
 
-        drawGameState(screen, gs, validMove, sqSelected, moveLogFont) 
+        drawGameState(screen, gs, validMove, sqSelected, moveLogFont)
 
         if gs.checkMate or gs.staleMate:
             gameOver = True
@@ -124,18 +184,15 @@ def DrawHightLightSquare(screen, gs, validMoves, sqSelected):
                     # s.blit(circle)
                     screen.blit(s, (move.endCol * SQ_SIZE, move.endRow * SQ_SIZE)) 
 
-
 def drawGameState(screen, gs, validMoves, sqSelected, moveLogFont):
     DrawBoard(screen)   #draw square on the board
     #can draw hight light suare or move suggestion(later)
     DrawHightLightSquare(screen, gs, validMoves, sqSelected)
     DrawPieces(screen, gs.board) # draw pieces on top of those square
-    drawMoveLog(screen, gs, moveLogFont)
+    DrawMoveLog(screen, gs, moveLogFont)
 
-"""
-Draw the square on the board
-"""
 def DrawBoard(screen):
+    """Draw the square on the board"""
     global colors
     colors = [p.Color("white"), p.Color("gray")]
     for r in range(DIMENSION):
@@ -143,10 +200,8 @@ def DrawBoard(screen):
             color = colors[(r + c) % 2]
             p.draw.rect(screen, color, p.Rect(SQ_SIZE*c, SQ_SIZE*r, SQ_SIZE, SQ_SIZE))
 
-"""
-Draw the pieces on the board in the current gamestate.board
-"""
 def DrawPieces(screen, board):
+    """Draw the pieces on the board in the current gamestate.board"""
     for r in range(DIMENSION):
         for c in range(DIMENSION):
             piece = board[r][c]
@@ -159,9 +214,10 @@ def DrawText(screen, text):
     textLocation = p.Rect(0, 0, BOARD_WIDTH, BOARD_HEIGHT).move(BOARD_WIDTH/2 - textObject.get_width()/2, BOARD_HEIGHT/2 - textObject.get_height()/2)
     screen.blit(textObject, textLocation)
 
-def drawMoveLog(screen, gs, font):
+def DrawMoveLog(screen, gs, font):
+    '''drawing text of move tracking all player or computer move'''
     moveLogRect = p.Rect(BOARD_WIDTH, 0, MOVE_LOG_PANEL_WITDH, MOVE_LOG_PANEL_HEIGHT)
-    p.draw.rect(screen, p.Color("black"), moveLogRect)
+    p.draw.rect(screen, (100,100,100), moveLogRect)
     moveLog = gs.moveLog
     moveTexts = []
     for i in range(0, len(moveLog), 2):
@@ -185,27 +241,47 @@ def drawMoveLog(screen, gs, font):
         screen.blit(textObject, textLocation)
         text_Y += textObject.get_height() + lineSpacing
 
-'''
-Fade out captured piece
-Source: https://nerdparadise.com/programming/pygameblitopacity 
-'''
-def blit_alpha(target, source, location, opacity):
-        x = location[0]
-        y = location[1]
-        temp = p.Surface((source.get_width(), source.get_height())).convert()
-        temp.blit(target, (-x, -y))
-        temp.blit(source, (0, 0))
-        temp.set_alpha(opacity)        
-        target.blit(temp, location)
+def Undo_game(gs, gameOver :bool, PlayerOne :bool, PlayerTwo :bool):
+    '''Undo the move if next move is bot undo once more time'''
+    if not gameOver:
+        gs.undoMove()
+    if not (gs.whiteToMove and PlayerOne) or (not gs.whiteToMove and PlayerTwo):
+        gs.undoMove()
+    return True, False #return moveMade and animate
 
-'''
-Draw animate move
-'''
+def Reset_game():
+    '''reset the game'''
+    gameOver = False
+    humanTurn = True
+    gs = ChessEngine.GameStart()
+    validMove = gs.GetValidMove()
+    sqSelected = ()
+    playerClicks = []
+    moveMade = False
+    animate = False
+    return gameOver, humanTurn, gs, validMove, sqSelected, playerClicks, moveMade, animate
+
+def Exit_game():
+    pass
+
+def blit_alpha(target, source, location, opacity):
+    ''' Fade out captured piece
+    Source: https://nerdparadise.com/programming/pygameblitopacity 
+    '''
+    x = location[0]
+    y = location[1]
+    temp = p.Surface((source.get_width(), source.get_height())).convert()
+    temp.blit(target, (-x, -y))
+    temp.blit(source, (0, 0))
+    temp.set_alpha(opacity)        
+    target.blit(temp, location)
+
 def AnimateMove(move, screen, board, clock):
+    '''Draw animate move'''
     global colors
     dR = move.endRow - move.startRow
     dC = move.endCol - move.startCol
-    framePerSquare = 10 #frames to move one square
+    framePerSquare = 3 #frames to move one square
     frameCount = (abs(dR) + abs(dC))*framePerSquare
     for frame in range(frameCount+1):
         r, c = (move.startRow + dR*frame/frameCount, move.startCol + dC*frame/frameCount)

@@ -6,3 +6,4 @@ có hình thức trừng phạt máy nếu máy tính toán quá lâu.
 debug enpassant move let the king in check. status: done 
 cannot capture enpassant pawn when the enemy pawn check the ally king. status: done
 debug when com run it result game over while the game is not over yet. status: done
+undo enpassant still a bug cuz it lose track of enpassant possible when we didn't make enpassant move. status: progress
